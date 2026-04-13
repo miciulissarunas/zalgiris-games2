@@ -3,9 +3,7 @@ import fs from "fs";
 
 const URL = "https://betsapi.com/basketball/t/45051/zalgiris";
 
-// BetsAPI rodo datas kaip MM/DD HH:mm, todėl pridedam einamuosius metus.
 function parseMatchDate(dateText) {
-  // Pvz. "04/14 17:30"
   const match = dateText.match(/^(\d{2})\/(\d{2})\s+(\d{2}):(\d{2})$/);
   if (!match) return null;
 
@@ -13,10 +11,8 @@ function parseMatchDate(dateText) {
   const now = new Date();
   const year = now.getFullYear();
 
-  // Naudojam local time
   const date = new Date(year, Number(mm) - 1, Number(dd), Number(hh), Number(min), 0);
 
-  // Jei data jau labai praeityje, gal puslapis rodo kitų metų sezoną
   if (date.getTime() < now.getTime() - 1000 * 60 * 60 * 24 * 30) {
     return new Date(year + 1, Number(mm) - 1, Number(dd), Number(hh), Number(min), 0);
   }
@@ -26,6 +22,12 @@ function parseMatchDate(dateText) {
 
 function normalizeSpaces(str) {
   return str.replace(/\s+/g, " ").trim();
+}
+
+function cleanTeamName(name) {
+  return String(name || "")
+    .replace(/^\s*[-–—]+\s*/, "")
+    .trim();
 }
 
 async function getNextGame() {
@@ -46,10 +48,7 @@ async function getNextGame() {
       timeout: 60000
     });
 
-    // Palaukiam, kol lentelė atsiras
     await page.waitForSelector("table", { timeout: 30000 });
-
-    // Nedidelė pauzė, jei duomenys užsikrauna po JS
     await page.waitForTimeout(2500);
 
     const rows = await page.$$eval("table tr", (trs) =>
@@ -65,7 +64,6 @@ async function getNextGame() {
       })
     );
 
-    // Debugui, jei reikės pasižiūrėti ką realiai surinko
     fs.writeFileSync("debug-rows.json", JSON.stringify(rows, null, 2), "utf8");
 
     const games = [];
@@ -73,18 +71,18 @@ async function getNextGame() {
     for (const row of rows) {
       const text = normalizeSpaces(row.raw);
 
-      // Ieškom eilučių, kur yra data ir Žalgiris
       const dateMatch = text.match(/\b\d{2}\/\d{2}\s+\d{2}:\d{2}\b/);
       if (!dateMatch) continue;
+
       if (!/zalgiris/i.test(text)) continue;
+
+      // Tik Euroleague
+      if (!/^euroleague\b/i.test(text)) continue;
 
       const dateText = dateMatch[0];
       const matchDate = parseMatchDate(dateText);
       if (!matchDate) continue;
 
-      // Pabandome ištraukti lygą ir rungtynių tekstą
-      // Pvz. "Euroleague 04/17 19:00 38 Zalgiris v Paris View"
-      // arba "Lithuania LKL 04/14 17:30 - Jonava v Zalgiris View"
       const cleaned = text
         .replace(dateText, "||DATE||")
         .replace(/\bView\b/gi, "")
@@ -99,25 +97,23 @@ async function getNextGame() {
       if (parts.length >= 2) {
         league = parts[0]
           .replace(/\bFixtures\b/gi, "")
-          .replace(/\bLeague\b/gi, "")
           .trim();
 
         matchup = parts[1]
-          .replace(/^\d+\s+/, "") // pašalina round numerį pvz. 38
+          .replace(/^\d+\s+/, "")
           .trim();
       }
 
-      // Ieškom "Team A v Team B"
       const matchupMatch = matchup.match(
-        /([A-Za-zÀ-ÿ0-9 .'\-]+)\s+v\s+([A-Za-zÀ-ÿ0-9 .'\-]+)$/i
+        /([A-Za-zÀ-ÿŽž0-9 .'\-]+)\s+v\s+([A-Za-zÀ-ÿŽž0-9 .'\-]+)$/i
       );
 
       let home = null;
       let away = null;
 
       if (matchupMatch) {
-        home = normalizeSpaces(matchupMatch[1]);
-        away = normalizeSpaces(matchupMatch[2]);
+        home = cleanTeamName(normalizeSpaces(matchupMatch[1]));
+        away = cleanTeamName(normalizeSpaces(matchupMatch[2]));
       }
 
       games.push({
@@ -137,14 +133,14 @@ async function getNextGame() {
       .sort((a, b) => a.timestamp - b.timestamp);
 
     if (!upcoming.length) {
-      throw new Error("Nepavyko rasti būsimų Žalgirio rungtynių.");
+      throw new Error("Nepavyko rasti būsimų Euroleague Žalgirio rungtynių.");
     }
 
     const nextGame = upcoming[0];
 
     fs.writeFileSync("next-game.json", JSON.stringify(nextGame, null, 2), "utf8");
 
-    console.log("Artimiausios Žalgirio rungtynės:");
+    console.log("Artimiausios Euroleague Žalgirio rungtynės:");
     console.log(JSON.stringify(nextGame, null, 2));
   } finally {
     await browser.close();
