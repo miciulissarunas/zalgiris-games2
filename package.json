@@ -1,0 +1,11 @@
+{
+  "name": "zalgiris-games",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "fetch": "node fetch.js"
+  },
+  "dependencies": {
+    "playwright": "^1.53.0"
+  }
+}
