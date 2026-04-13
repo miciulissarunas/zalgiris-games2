@@ -1,0 +1,39 @@
+name: Fetch next Zalgiris game
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/30 * * * *"   # kas 30 min
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run fetch script
+        run: node fetch.js
+
+      - name: Show result
+        run: cat next-game.json
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-game
+          path: |
+            next-game.json
+            debug-rows.json
