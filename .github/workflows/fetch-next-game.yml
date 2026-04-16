@@ -19,24 +19,15 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
-
       - name: Run fetch script
-        id: fetch
         run: node fetch.js
 
-      - name: Upload debug artifacts on failure
+      - name: Upload debug artifact on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: debug-output
-          path: |
-            debug-page.html
-            debug-rows.json
+          path: debug-games.json
           if-no-files-found: ignore
           retention-days: 7
 
