@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -27,9 +26,22 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run fetch script
+        id: fetch
         run: node fetch.js
 
+      - name: Upload debug artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-output
+          path: |
+            debug-page.html
+            debug-rows.json
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Commit result to repo
+        if: success()
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
