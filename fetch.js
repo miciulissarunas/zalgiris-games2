@@ -3,6 +3,43 @@ import fs from "fs";
 const API_URL =
   "https://feeds.incrowdsports.com/provider/euroleague-feeds/v2/competitions/E/seasons/E2025/games?teamCode=ZAL";
 
+const MONTHS_LT = [
+  "sausio", "vasario", "kovo", "balandžio", "gegužės", "birželio",
+  "liepos", "rugpjūčio", "rugsėjo", "spalio", "lapkričio", "gruodžio"
+];
+
+function formatLithuanian(isoDate) {
+  const d = new Date(isoDate);
+
+  // Paimam datos dalis Vilniaus laiku
+  const parts = new Intl.DateTimeFormat("lt-LT", {
+    timeZone: "Europe/Vilnius",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  }).formatToParts(d);
+
+  const get = (type) => parts.find((p) => p.type === type)?.value;
+  const day = Number(get("day"));
+  const month = Number(get("month"));
+  const year = Number(get("year"));
+  const hour = get("hour");
+  const minute = get("minute");
+
+  const monthName = MONTHS_LT[month - 1];
+  const monthNameCapitalized = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+
+  return {
+    dateText: `${monthNameCapitalized} ${day}d.`,     // "Balandžio 17d."
+    timeText: `${hour}:${minute}`,                      // "20:00" (Vilniaus laiku)
+    full: `${monthNameCapitalized} ${day}d., ${hour}:${minute}`, // "Balandžio 17d., 20:00"
+    year
+  };
+}
+
 async function getNextGame() {
   const res = await fetch(API_URL, {
     headers: {
@@ -21,7 +58,6 @@ async function getNextGame() {
   const body = await res.json();
   const games = Array.isArray(body.data) ? body.data : [];
 
-  // Debug — visada rašom, kad sekančiu kartu, jei kas, būtų ką žiūrėti
   fs.writeFileSync(
     "debug-games.json",
     JSON.stringify(games.slice(0, 5), null, 2),
@@ -34,14 +70,13 @@ async function getNextGame() {
 
   const now = Date.now();
 
-  // Tik dar nesužaistos (status !== 'result') ir ateityje
   const upcoming = games
     .filter((g) => {
       const t = new Date(g.date).getTime();
       return (
         g.status !== "result" &&
         Number.isFinite(t) &&
-        t >= now - 5 * 60 * 1000 // 5 min buferis jei tik ką prasidėjo
+        t >= now - 5 * 60 * 1000
       );
     })
     .sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -52,12 +87,16 @@ async function getNextGame() {
 
   const g = upcoming[0];
   const matchDate = new Date(g.date);
+  const fmt = formatLithuanian(g.date);
 
   const nextGame = {
     league: "Euroleague",
     round: g.round?.round ?? null,
     phase: g.phaseType?.name ?? null,
-    dateText: matchDate.toISOString(),
+    dateText: fmt.dateText,      // "Balandžio 17d."
+    timeText: fmt.timeText,      // "20:00"
+    dateTimeText: fmt.full,      // "Balandžio 17d., 20:00"
+    year: fmt.year,
     iso: matchDate.toISOString(),
     timestamp: matchDate.getTime(),
     home: g.home?.club?.name ?? g.home?.name ?? null,
