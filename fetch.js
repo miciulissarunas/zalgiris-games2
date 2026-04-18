@@ -10,8 +10,6 @@ const MONTHS_LT = [
 
 function formatLithuanian(isoDate) {
   const d = new Date(isoDate);
-
-  // Paimam datos dalis Vilniaus laiku
   const parts = new Intl.DateTimeFormat("lt-LT", {
     timeZone: "Europe/Vilnius",
     year: "numeric",
@@ -28,14 +26,13 @@ function formatLithuanian(isoDate) {
   const year = Number(get("year"));
   const hour = get("hour");
   const minute = get("minute");
-
   const monthName = MONTHS_LT[month - 1];
   const monthNameCapitalized = monthName.charAt(0).toUpperCase() + monthName.slice(1);
 
   return {
-    dateText: `${monthNameCapitalized} ${day}d.`,     // "Balandžio 17d."
-    timeText: `${hour}:${minute}`,                      // "20:00" (Vilniaus laiku)
-    full: `${monthNameCapitalized} ${day}d., ${hour}:${minute}`, // "Balandžio 17d., 20:00"
+    dateText: `${monthNameCapitalized} ${day}d.`,
+    timeText: `${hour}:${minute}`,
+    full: `${monthNameCapitalized} ${day}d., ${hour}:${minute}`,
     year
   };
 }
@@ -69,7 +66,6 @@ async function getNextGame() {
   }
 
   const now = Date.now();
-
   const upcoming = games
     .filter((g) => {
       const t = new Date(g.date).getTime();
@@ -81,10 +77,15 @@ async function getNextGame() {
     })
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-if (!upcoming.length) {
+  if (!upcoming.length) {
     console.warn("Nerasta būsimų Žalgirio rungtynių.");
-    const fallback = { dateText: "nera numatytu varzybu", home: "---", away: "---", label: "--- vs ---" };
-    fs.writeFileSync("game.json", JSON.stringify(fallback, null, 2));
+    const fallback = {
+      dateText: "nera numatytu varzybu",
+      home: "---",
+      away: "---",
+      label: "--- vs ---"
+    };
+    fs.writeFileSync("next-game.json", JSON.stringify(fallback, null, 2), "utf8");
     console.log("Įrašyta:", JSON.stringify(fallback));
     process.exit(0);
   }
@@ -97,9 +98,9 @@ if (!upcoming.length) {
     league: "Euroleague",
     round: g.round?.round ?? null,
     phase: g.phaseType?.name ?? null,
-    dateText: fmt.dateText,      // "Balandžio 17d."
-    timeText: fmt.timeText,      // "20:00"
-    dateTimeText: fmt.full,      // "Balandžio 17d., 20:00"
+    dateText: fmt.dateText,
+    timeText: fmt.timeText,
+    dateTimeText: fmt.full,
     year: fmt.year,
     iso: matchDate.toISOString(),
     timestamp: matchDate.getTime(),
@@ -115,7 +116,6 @@ if (!upcoming.length) {
   };
 
   fs.writeFileSync("next-game.json", JSON.stringify(nextGame, null, 2), "utf8");
-
   console.log("Artimiausios Euroleague Žalgirio rungtynės:");
   console.log(JSON.stringify(nextGame, null, 2));
 }
