@@ -1,17 +1,6 @@
 {
-  "league": "Euroleague",
-  "round": 38,
-  "phase": "Regular Season",
-  "dateText": "Balandžio 17d.",
-  "timeText": "20:00",
-  "dateTimeText": "Balandžio 17d., 20:00",
-  "year": 2026,
-  "iso": "2026-04-17T17:00:00.000Z",
-  "timestamp": 1776445200000,
-  "home": "Zalgiris Kaunas",
-  "away": "Paris Basketball",
-  "matchup": "Zalgiris Kaunas v Paris Basketball",
-  "venue": "ZALGIRIO ARENA",
-  "code": 380,
-  "status": "confirmed"
+  "dateText": "nera numatytu varzybu",
+  "home": "---",
+  "away": "---",
+  "label": "--- vs ---"
 }
