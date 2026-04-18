@@ -80,9 +80,9 @@ async function getNextGame() {
   if (!upcoming.length) {
     console.warn("Nerasta būsimų Žalgirio rungtynių.");
     const fallback = {
-      dateText: "nera numatytu varzybu",
-      home: "---",
-      away: "---",
+      dateText: "Nėra numatytų varžybų",
+      home: "NĖRA",
+      away: "NĖRA",
       label: "--- vs ---"
     };
     fs.writeFileSync("next-game.json", JSON.stringify(fallback, null, 2), "utf8");
