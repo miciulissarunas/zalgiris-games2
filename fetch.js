@@ -81,8 +81,12 @@ async function getNextGame() {
     })
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  if (!upcoming.length) {
-    throw new Error("Nerastos būsimos Euroleague Žalgirio rungtynės.");
+if (!upcoming.length) {
+    console.warn("Nerasta būsimų Žalgirio rungtynių.");
+    const fallback = { dateText: "nera numatytu varzybu", home: "---", away: "---", label: "--- vs ---" };
+    fs.writeFileSync("game.json", JSON.stringify(fallback, null, 2));
+    console.log("Įrašyta:", JSON.stringify(fallback));
+    process.exit(0);
   }
 
   const g = upcoming[0];
