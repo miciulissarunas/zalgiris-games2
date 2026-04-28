@@ -1,17 +1,17 @@
 {
   "league": "Euroleague",
-  "round": 41,
+  "round": 42,
   "phase": "Playoffs",
-  "dateText": "Balandžio 28d.",
+  "dateText": "Balandžio 30d.",
   "timeText": "20:45",
-  "dateTimeText": "Balandžio 28d., 20:45",
+  "dateTimeText": "Balandžio 30d., 20:45",
   "year": 2026,
-  "iso": "2026-04-28T17:45:00.000Z",
-  "timestamp": 1777398300000,
+  "iso": "2026-04-30T17:45:00.000Z",
+  "timestamp": 1777571100000,
   "home": "Fenerbahce Beko Istanbul",
   "away": "Zalgiris Kaunas",
   "matchup": "Fenerbahce Beko Istanbul v Zalgiris Kaunas",
   "venue": "ULKER SPORTS AND EVENT HALL",
-  "code": 385,
+  "code": 389,
   "status": "confirmed"
 }
