@@ -1,17 +1,6 @@
 {
-  "league": "Euroleague",
-  "round": 44,
-  "phase": "Playoffs",
-  "dateText": "Gegužės 8d.",
-  "timeText": "20:00",
-  "dateTimeText": "Gegužės 8d., 20:00",
-  "year": 2026,
-  "iso": "2026-05-08T17:00:00.000Z",
-  "timestamp": 1778259600000,
-  "home": "Zalgiris Kaunas",
-  "away": "Fenerbahce Beko Istanbul",
-  "matchup": "Zalgiris Kaunas v Fenerbahce Beko Istanbul",
-  "venue": "ZALGIRIO ARENA",
-  "code": 397,
-  "status": "confirmed"
+  "dateText": "Nėra numatytų varžybų",
+  "home": "NĖRA",
+  "away": "NĖRA",
+  "label": "--- vs ---"
 }
